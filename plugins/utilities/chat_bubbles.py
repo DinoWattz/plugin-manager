@@ -23,8 +23,9 @@ plugman = dict(
     version="1.0.0",
 )
 
-PRINT_CHAT_MESSAGES = True # Prints chat messages to the console as "[Character's Name] Player 1/Player 2: Hello World!"
-BUBBLE_DURATION: float = 4.7 # 4.7 matches the default onscreen message duration
+# Prints chat messages to the console as "[Character's Name] Player 1/Player 2: Hello World!"
+PRINT_CHAT_MESSAGES = True
+BUBBLE_DURATION: float = 4.7  # 4.7 matches the default onscreen message duration
 SPEAK_VOLUME = 1.5
 SHOUT_VOLUME = 3.0
 
@@ -35,13 +36,13 @@ CELEBRATE_MESSAGE = [(bs.CelebrateMessage, {"duration": 1.0})]
 EASTER_EGGS = [
     {
         "triggers": {
-                    "hi", "hello", "hey", "hiya", "yo", "sup", "heya", "howdy",
-                    "greetings", "salutations", "ahoy", "ahoyhoy", "bonjour",
-                    "hola", "ciao", "ola", "oi", "eae", "salve",
+            "hi", "hello", "hey", "hiya", "yo", "sup", "heya", "howdy",
+            "greetings", "salutations", "ahoy", "ahoyhoy", "bonjour",
+            "hola", "ciao", "ola", "oi", "eae", "salve",
                     "bye", "goodbye", "see ya", "see you", "cya",
                     "adios", "chau", "chao", "tchau",
                     "adeus", "ate mais", "falou", "flw"
-                     },
+        },
         "node_messages": [("celebrate_r", 1000)],
     },
     {
@@ -229,6 +230,8 @@ EASTER_EGGS = [
 ]
 
 # Chat bubble functionality
+
+
 def create_bubble(player: bs.SessionPlayer, text: str, name: str):
     msg = normalize_message(text)
     is_caps = len(text) > 1 and text.isupper()
@@ -240,11 +243,14 @@ def create_bubble(player: bs.SessionPlayer, text: str, name: str):
     def _fallback_logic():
         nonlocal handled, activityplayer
         color = (1, 1, 0.4)
-        image_icon = {'texture': bs.gettexture("cuteSpaz"), 'tint_texture': bs.gettexture("cuteSpaz"), 'tint_color': (1.0, 1.0, 1.0), 'tint2_color': (1.0, 1.0, 1.0)}
+        image_icon = {'texture': bs.gettexture("cuteSpaz"), 'tint_texture': bs.gettexture(
+            "cuteSpaz"), 'tint_color': (1.0, 1.0, 1.0), 'tint2_color': (1.0, 1.0, 1.0)}
 
         if activityplayer:
-            normal_highlight = bs.normalized_color( bs.safecolor(player.highlight, target_intensity=1.15) )
-            saturated_highlight = bs.normalized_color( bs.safecolor(player.highlight, target_intensity=0.75) )
+            normal_highlight = bs.normalized_color(
+                bs.safecolor(player.highlight, target_intensity=1.15))
+            saturated_highlight = bs.normalized_color(
+                bs.safecolor(player.highlight, target_intensity=0.75))
             color = saturated_highlight if is_caps else normal_highlight
             image_icon = activityplayer.get_icon()
 
@@ -252,7 +258,7 @@ def create_bubble(player: bs.SessionPlayer, text: str, name: str):
                             color=color,
                             top=True,
                             image=image_icon)
-        
+
         for egg in EASTER_EGGS:
             if msg in egg["triggers"]:
                 if egg.get("sound"):
@@ -298,7 +304,7 @@ def create_bubble(player: bs.SessionPlayer, text: str, name: str):
                 activity = actor.getactivity()
                 if activity is None or getattr(activity, 'expired', False):
                     continue
-                
+
                 with activity.context:
                     # Calculate scale based on text length
                     base_scale = 0.015
@@ -312,23 +318,25 @@ def create_bubble(player: bs.SessionPlayer, text: str, name: str):
                     })
                     char_node.connectattr('torso_position', mnode, 'input2')
 
-                    normal_highlight = bs.normalized_color( bs.safecolor(player.highlight, target_intensity=1.15) )
-                    saturated_highlight = bs.normalized_color( bs.safecolor(player.highlight, target_intensity=0.75) )
+                    normal_highlight = bs.normalized_color(
+                        bs.safecolor(player.highlight, target_intensity=1.15))
+                    saturated_highlight = bs.normalized_color(
+                        bs.safecolor(player.highlight, target_intensity=0.75))
                     bubble_color = saturated_highlight if is_caps else normal_highlight
 
                     textnode = bs.newnode('text',
-                        owner=char_node,
-                        attrs={
-                            'text': text,
-                            'color': bubble_color,
-                            'shadow': 0.5,
-                            'flatness': 0.5,
-                            'scale': scale,
-                            'h_align': 'center',
-                            'v_align': 'bottom',
-                            'in_world': True,
-                            'opacity': 1.0,
-                        })
+                                          owner=char_node,
+                                          attrs={
+                                              'text': text,
+                                              'color': bubble_color,
+                                              'shadow': 0.5,
+                                              'flatness': 0.5,
+                                              'scale': scale,
+                                              'h_align': 'center',
+                                              'v_align': 'bottom',
+                                              'in_world': True,
+                                              'opacity': 1.0,
+                                          })
 
                     mnode.connectattr('output', textnode, 'position')
 
@@ -366,7 +374,8 @@ def create_bubble(player: bs.SessionPlayer, text: str, name: str):
                                         sound = random.choice(pickup_sounds)
 
                             if sound:
-                                _play_chat_sound(actor, sound, SHOUT_VOLUME if is_caps else SPEAK_VOLUME)
+                                _play_chat_sound(
+                                    actor, sound, SHOUT_VOLUME if is_caps else SPEAK_VOLUME)
 
                             # Animation logic
                             if egg.get('messages') and actor.is_alive() and hasattr(actor, 'handlemessage'):
@@ -417,11 +426,12 @@ def create_bubble(player: bs.SessionPlayer, text: str, name: str):
                                     b for b in activityplayer.customdata['chat_bubbles'] if b[0] != textnode
                                 ]
                     bs.timer(bubble_duration, cleanup)
-    
+
     if not bubble_created:
         # No valid actor found: play sound if possible
         _fallback_logic()
         return
+
 
 def update_bubble_offsets(bubbles):
     for i, (tnode, mnode) in enumerate(reversed(bubbles)):
@@ -430,6 +440,8 @@ def update_bubble_offsets(bubbles):
             mnode.input1 = (0, y_offset, 0)
 
 # Tools
+
+
 def normalize_message(text):
     msg = text.strip().lower()
     msg = msg.translate(str.maketrans('', '', string.punctuation))
@@ -437,27 +449,30 @@ def normalize_message(text):
         c for c in unicodedata.normalize('NFD', msg)
         if unicodedata.category(c) != 'Mn'
     )
-    
+
     return msg
 
 # ba_meta export babase.Plugin
+
+
 class Plugin(babase.Plugin):
     def on_app_running(self) -> None:
         # Hook into chat message filtering
         # We're delaying until the app runs and using a timer so it's more likely to work with other chat plugins (please don't make a chat plugin/filter that is delayed like this).
         bs.apptimer(0.001, bs.WeakCallStrict(self.apply_patch))
-        
+
     def apply_patch(self):
         import bascenev1._hooks as _hooks
-        
+
         _org_filter_chat_message = _hooks.filter_chat_message
+
         def _chat_bubbles_hook(msg: str, client_id: int, *args, **kwargs) -> str | None:
             org_msg = _org_filter_chat_message(msg, client_id, *args, **kwargs)
-            
+
             if org_msg is None:
                 # The original message has been ignored, so we should ignore it as well
                 return org_msg
-            
+
             # Chat bubble sorcery
             try:
                 roster = bs.get_game_roster()
@@ -478,42 +493,43 @@ class Plugin(babase.Plugin):
                             player_list.append(player)
                             continue
                     if player_list:
-                            # Get combined name for multiple players on same client
-                            name = ''
-                            created_bubble = False
-                            
-                            for player in player_list:
-                                if name == '':
-                                    name = player.getname()
-                                else:
-                                    name = name + '/' + player.getname()
+                        # Get combined name for multiple players on same client
+                        name = ''
+                        created_bubble = False
 
-                            # Create chat bubble
-                            for player in player_list:
-                                activityplayer: bs.Player = player.activityplayer
-                                # We have a session player but not an activity player
-                                if not activityplayer:
-                                    if not dead_bubble:
-                                        create_bubble(player, org_msg, name)
-                                        created_bubble = dead_bubble = True
-                                    continue
-                                # We have a dead activity player
-                                if not activityplayer.is_alive() and not dead_bubble:
+                        for player in player_list:
+                            if name == '':
+                                name = player.getname()
+                            else:
+                                name = name + '/' + player.getname()
+
+                        # Create chat bubble
+                        for player in player_list:
+                            activityplayer: bs.Player = player.activityplayer
+                            # We have a session player but not an activity player
+                            if not activityplayer:
+                                if not dead_bubble:
                                     create_bubble(player, org_msg, name)
                                     created_bubble = dead_bubble = True
-                                    character = activityplayer.character if character is None else character
-                                # elif we have an alive activity player
-                                elif activityplayer.is_alive():
-                                    create_bubble(player, org_msg, name)
-                                    created_bubble = True
-                                    character = activityplayer.character if character is None else character
+                                continue
+                            # We have a dead activity player
+                            if not activityplayer.is_alive() and not dead_bubble:
+                                create_bubble(player, org_msg, name)
+                                created_bubble = dead_bubble = True
+                                character = activityplayer.character if character is None else character
+                            # elif we have an alive activity player
+                            elif activityplayer.is_alive():
+                                create_bubble(player, org_msg, name)
+                                created_bubble = True
+                                character = activityplayer.character if character is None else character
 
-                            if created_bubble:
-                                matched = True
-                                if PRINT_CHAT_MESSAGES:
-                                    print(f"[{character}] {name}: {org_msg}")
-                            else:
-                                bs.logging.warning("Failed to create a chat bubble, using non-session player method now.")
+                        if created_bubble:
+                            matched = True
+                            if PRINT_CHAT_MESSAGES:
+                                print(f"[{character}] {name}: {org_msg}")
+                        else:
+                            bs.logging.warning(
+                                "Failed to create a chat bubble, using non-session player method now.")
                     # Non-session players (in lobby or just spectating, this only works for servers)
                     if not matched and not dead_bubble:
                         for client in roster:
@@ -537,41 +553,42 @@ class Plugin(babase.Plugin):
 
     class Focus(bs.Actor):
         def __init__(
-        self,
-        *,
-        owner: bs.Node | None = None,
-    ):
+            self,
+            *,
+            owner: bs.Node | None = None,
+        ):
             super().__init__()
 
             self._focusnode_material = bs.Material()
             self._focusnode_material.add_actions(
-                    actions=('modify_node_collision', 'collide', False),
-                )
-            
+                actions=('modify_node_collision', 'collide', False),
+            )
+
             if getattr(owner, 'owner', None):
                 assert owner is not None
-                area_of_interest = False if getattr(owner.owner, 'is_area_of_interest', False) else True
+                area_of_interest = False if getattr(
+                    owner.owner, 'is_area_of_interest', False) else True
             else:
                 area_of_interest = False if getattr(owner, 'is_area_of_interest', False) else True
 
             # I'm tired of this area_of_interest nonsense, it never works right
-            #area_of_interest = False
+            # area_of_interest = False
             # actually it might work now that we don't spawn bubbles for dead players.
 
             self.node = bs.newnode(
-                        'prop',
-                        delegate=self,
-                        owner=owner,
-                        attrs={
-                            'body': 'sphere',
+                'prop',
+                delegate=self,
+                owner=owner,
+                attrs={
+                    'body': 'sphere',
                             'body_scale': 0.0,
                             'shadow_size': 0.0,
                             'gravity_scale': 0.0,
                             'is_area_of_interest': area_of_interest,
                             'materials': (self._focusnode_material,),
-                        },
-                    )
-            
+                },
+            )
+
         @override
         def handlemessage(self, msg: Any) -> Any:
             assert not self.expired
